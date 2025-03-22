@@ -4,17 +4,23 @@ import { Unhabit, UnhabitLog } from '../types';
 
 interface UnhabitsState {
   unhabits: Unhabit[];
+  archivedUnhabits: Unhabit[];
   logs: UnhabitLog[];
   loading: boolean;
   error: string | null;
   fetchUnhabits: () => Promise<void>;
-  addUnhabit: (unhabit: Omit<Unhabit, 'id' | 'createdAt' | 'archived'>) => Promise<void>;
+  fetchArchivedUnhabits: () => Promise<void>;
+  addUnhabit: (
+    unhabit: Omit<Unhabit, 'id' | 'createdAt' | 'archived'>,
+  ) => Promise<void>;
   addLog: (log: Omit<UnhabitLog, 'id'>) => Promise<void>;
   archiveUnhabit: (id: string) => Promise<void>;
+  restoreUnhabit: (id: string) => Promise<void>;
 }
 
-export const useUnhabitsStore = create<UnhabitsState>()((set, get) => ({
+export const useUnhabitsStore = create<UnhabitsState>()((set) => ({
   unhabits: [],
+  archivedUnhabits: [],
   logs: [],
   loading: false,
   error: null,
@@ -25,6 +31,7 @@ export const useUnhabitsStore = create<UnhabitsState>()((set, get) => ({
       const { data: unhabits, error: unhabitsError } = await supabase
         .from('unhabits')
         .select('*')
+        .eq('archived', false)
         .order('created_at', { ascending: false });
 
       if (unhabitsError) throw unhabitsError;
@@ -38,7 +45,30 @@ export const useUnhabitsStore = create<UnhabitsState>()((set, get) => ({
 
       set({ unhabits, logs, loading: false });
     } catch (error) {
-      set({ error: error instanceof Error ? error.message : 'An error occurred', loading: false });
+      set({
+        error: error instanceof Error ? error.message : 'An error occurred',
+        loading: false,
+      });
+    }
+  },
+
+  fetchArchivedUnhabits: async () => {
+    set({ loading: true, error: null });
+    try {
+      const { data: archivedUnhabits, error } = await supabase
+        .from('unhabits')
+        .select('*')
+        .eq('archived', true)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      set({ archivedUnhabits, loading: false });
+    } catch (error) {
+      set({
+        error: error instanceof Error ? error.message : 'An error occurred',
+        loading: false,
+      });
     }
   },
 
@@ -56,7 +86,9 @@ export const useUnhabitsStore = create<UnhabitsState>()((set, get) => ({
         unhabits: [data, ...state.unhabits],
       }));
     } catch (error) {
-      set({ error: error instanceof Error ? error.message : 'An error occurred' });
+      set({
+        error: error instanceof Error ? error.message : 'An error occurred',
+      });
     }
   },
 
@@ -74,7 +106,9 @@ export const useUnhabitsStore = create<UnhabitsState>()((set, get) => ({
         logs: [data, ...state.logs],
       }));
     } catch (error) {
-      set({ error: error instanceof Error ? error.message : 'An error occurred' });
+      set({
+        error: error instanceof Error ? error.message : 'An error occurred',
+      });
     }
   },
 
@@ -88,12 +122,41 @@ export const useUnhabitsStore = create<UnhabitsState>()((set, get) => ({
       if (error) throw error;
 
       set((state) => ({
-        unhabits: state.unhabits.map((unhabit) =>
-          unhabit.id === id ? { ...unhabit, archived: true } : unhabit
-        ),
+        unhabits: state.unhabits.filter((unhabit) => unhabit.id !== id),
+        archivedUnhabits: [
+          state.unhabits.find((unhabit) => unhabit.id === id)!,
+          ...state.archivedUnhabits,
+        ],
       }));
     } catch (error) {
-      set({ error: error instanceof Error ? error.message : 'An error occurred' });
+      set({
+        error: error instanceof Error ? error.message : 'An error occurred',
+      });
+    }
+  },
+
+  restoreUnhabit: async (id) => {
+    try {
+      const { error } = await supabase
+        .from('unhabits')
+        .update({ archived: false })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      set((state) => ({
+        archivedUnhabits: state.archivedUnhabits.filter(
+          (unhabit) => unhabit.id !== id,
+        ),
+        unhabits: [
+          state.archivedUnhabits.find((unhabit) => unhabit.id === id)!,
+          ...state.unhabits,
+        ],
+      }));
+    } catch (error) {
+      set({
+        error: error instanceof Error ? error.message : 'An error occurred',
+      });
     }
   },
 }));

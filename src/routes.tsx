@@ -1,8 +1,13 @@
-import { createRouter, createRoute, createRootRoute } from '@tanstack/react-router';
+import {
+  createRouter,
+  createRoute,
+  createRootRoute,
+} from '@tanstack/react-router';
 import { Layout } from './components/Layout';
 import { Dashboard } from './pages/Dashboard';
 import { UnhabitForm } from './pages/UnhabitForm';
 import { UnhabitDetails } from './pages/UnhabitDetails';
+import ArchivedUnhabits from './pages/ArchivedUnhabits';
 
 const rootRoute = createRootRoute({
   component: Layout,
@@ -26,6 +31,17 @@ const unhabitRoute = createRoute({
   component: UnhabitDetails,
 });
 
-const routeTree = rootRoute.addChildren([indexRoute, newUnhabitRoute, unhabitRoute]);
+const archivedRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/archived',
+  component: ArchivedUnhabits,
+});
+
+const routeTree = rootRoute.addChildren([
+  indexRoute,
+  newUnhabitRoute,
+  unhabitRoute,
+  archivedRoute,
+]);
 
 export const router = createRouter({ routeTree });
