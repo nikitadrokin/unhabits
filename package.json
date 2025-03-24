@@ -11,6 +11,7 @@
     "generate-pwa-assets": "pwa-assets-generator --config pwa-assets.config.ts"
   },
   "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.6",
     "@radix-ui/react-slot": "^1.1.2",
     "@supabase/supabase-js": "^2.39.7",
     "@tailwindcss/vite": "^4.0.15",

@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { Link } from '@tanstack/react-router';
 import { format } from 'date-fns';
 import { useUnhabitsStore } from '../store/unhabitsStore';
 import { Archive, ArrowRight, Box } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
 
 export function Dashboard() {
   const { unhabits, logs, archiveUnhabit, fetchUnhabits } = useUnhabitsStore();
@@ -17,11 +17,15 @@ export function Dashboard() {
     <div>
       <div className='flex justify-between items-center mb-8'>
         <h1 className='text-3xl font-bold'>Your Unhabits</h1>
-        <Link to='/archived'>
-          <Button variant='ghost' size='sm' className='text-muted-foreground'>
-            <Box className='h-4 w-4 mr-2' />
-            Archived
-          </Button>
+        <Link
+          to='/archived'
+          className={buttonVariants({
+            variant: 'link',
+            className: 'text-muted-foreground',
+          })}
+        >
+          <Box className='h-4 w-4' />
+          Archived
         </Link>
       </div>
 
@@ -76,7 +80,10 @@ export function Dashboard() {
                   <Link
                     to='/unhabit/$unhabitId'
                     params={{ unhabitId: unhabit.id }}
-                    className='inline-flex items-center text-indigo-600 hover:text-indigo-700'
+                    className={buttonVariants({
+                      variant: 'link',
+                      className: 'text-indigo-600 hover:text-indigo-700',
+                    })}
                   >
                     Details
                     <ArrowRight className='h-4 w-4 ml-1' />

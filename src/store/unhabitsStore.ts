@@ -14,6 +14,11 @@ interface UnhabitsState {
     unhabit: Omit<Unhabit, 'id' | 'createdAt' | 'archived'>,
   ) => Promise<void>;
   addLog: (log: Omit<UnhabitLog, 'id'>) => Promise<void>;
+  updateLog: (logId: string, count: number) => Promise<void>;
+  updateUnhabit: (
+    id: string,
+    updates: Partial<Omit<Unhabit, 'id' | 'createdAt' | 'archived'>>,
+  ) => Promise<void>;
   archiveUnhabit: (id: string) => Promise<void>;
   restoreUnhabit: (id: string) => Promise<void>;
 }
@@ -104,6 +109,48 @@ export const useUnhabitsStore = create<UnhabitsState>()((set) => ({
 
       set((state) => ({
         logs: [data, ...state.logs],
+      }));
+    } catch (error) {
+      set({
+        error: error instanceof Error ? error.message : 'An error occurred',
+      });
+    }
+  },
+
+  updateLog: async (logId, count) => {
+    try {
+      const { error } = await supabase
+        .from('logs')
+        .update({ count })
+        .eq('id', logId);
+
+      if (error) throw error;
+
+      set((state) => ({
+        logs: state.logs.map((log) =>
+          log.id === logId ? { ...log, count } : log,
+        ),
+      }));
+    } catch (error) {
+      set({
+        error: error instanceof Error ? error.message : 'An error occurred',
+      });
+    }
+  },
+
+  updateUnhabit: async (id, updates) => {
+    try {
+      const { error } = await supabase
+        .from('unhabits')
+        .update(updates)
+        .eq('id', id);
+
+      if (error) throw error;
+
+      set((state) => ({
+        unhabits: state.unhabits.map((unhabit) =>
+          unhabit.id === id ? { ...unhabit, ...updates } : unhabit,
+        ),
       }));
     } catch (error) {
       set({
