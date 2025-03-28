@@ -106,7 +106,7 @@ export function UnhabitDetails() {
                     <Edit2 className='h-4 w-4' />
                   </Button>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className='bg-white'>
                   <DialogHeader>
                     <DialogTitle>Edit Unhabit</DialogTitle>
                   </DialogHeader>

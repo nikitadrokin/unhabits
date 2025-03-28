@@ -34,7 +34,7 @@ export default function ArchivedUnhabits() {
         >
           <ArrowLeft className='h-4 w-4' />
         </Button>
-        <h1 className='text-2xl font-bold'>Archived UnHabits</h1>
+        <h1 className='text-2xl font-bold'>Archived Unhabits</h1>
       </div>
 
       {loading ? (

@@ -9,7 +9,29 @@ import { UnhabitForm } from './pages/UnhabitForm';
 import { UnhabitDetails } from './pages/UnhabitDetails';
 import ArchivedUnhabits from './pages/ArchivedUnhabits';
 
+import appCss from '@/index.css?url';
+
 const rootRoute = createRootRoute({
+  head: () => ({
+    meta: [
+      {
+        charSet: 'utf-8',
+      },
+      {
+        name: 'viewport',
+        content: 'width=device-width, initial-scale=1',
+      },
+      {
+        title: 'Unhabits',
+      },
+    ],
+    links: [
+      {
+        rel: 'stylesheet',
+        href: appCss,
+      },
+    ],
+  }),
   component: Layout,
 });
 
