@@ -1,0 +1,21 @@
+# UnHabits Project Rules
+
+## Project Configuration
+- Package Manager: [See package_manager.mdc](./package_manager.mdc)
+
+## Current Tasks
+- Implementing PWA assets generation for the project
+- Setting up iOS PWA testing environment
+- Configuring iOS-specific PWA settings
+- Creating local HTTPS development environment
+- Implementing archived unhabits view and restore functionality
+- Implementing proper logging functionality for unhabits
+- Adding edit capabilities for individual unhabits
+
+## Technical Stack
+- Vite
+- React
+- TypeScript
+- PWA support via vite-plugin-pwa
+- Local HTTPS development server
+- Bun package manager 

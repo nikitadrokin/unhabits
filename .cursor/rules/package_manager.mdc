@@ -1,0 +1,18 @@
+# Package Manager Configuration
+
+## Current Package Manager
+- Use `bun` as the primary package manager for the project
+- Prefer `bun` commands over npm, yarn, or pnpm
+- Use `bunx` for one-off package executions instead of npx/pnpx
+
+## Commands to Use
+- Installation: `bun install`
+- Adding dependencies: `bun add [package]`
+- Adding dev dependencies: `bun add -d [package]`
+- Running scripts: `bun run [script]`
+- Package execution: `bunx [package]`
+
+## Migration Notes
+- Remove other lock files if present (package-lock.json, yarn.lock, pnpm-lock.yaml)
+- Keep only bun.lockb for dependency locking
+- Update CI/CD pipelines to use bun instead of other package managers 
