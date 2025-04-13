@@ -1,0 +1,46 @@
+# Authentication Configuration
+
+## Overview
+The application uses better-auth for authentication, replacing the previous Supabase implementation.
+
+## Components
+
+### AuthProvider
+- Manages authentication state using React Context
+- Provides user session information to child components
+- Handles loading states and authentication flow
+- Uses better-auth client for session management
+
+### AuthForm
+- Handles user sign-in and sign-up
+- Supports email/password authentication
+- Includes form validation and error handling
+- Uses better-auth client for authentication operations
+
+## Environment Variables
+Required environment variables for authentication:
+- GITHUB_CLIENT_ID
+- GITHUB_CLIENT_SECRET
+- GOOGLE_CLIENT_ID
+- GOOGLE_CLIENT_SECRET
+
+## Authentication Flow
+1. User enters credentials in AuthForm
+2. AuthForm submits credentials to better-auth
+3. On successful authentication:
+   - Session is created
+   - User state is updated
+   - Redirect to protected content
+4. On error:
+   - Error message is displayed
+   - User can retry
+
+## Social Authentication
+Supported providers:
+- GitHub
+- Google
+
+## Session Management
+- Sessions are managed by better-auth
+- AuthProvider listens for session changes
+- Automatic session refresh handling 

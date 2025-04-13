@@ -9,10 +9,13 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "generate-pwa-assets": "pwa-assets-generator --config pwa-assets.config.ts",
-    "db:migration:new": "supabase db diff -f",
-    "db:migration:up": "supabase db push",
-    "db:migration:reset": "supabase db reset",
-    "db:migration:status": "supabase db status"
+    "db:migration:new": "drizzle-kit generate:pg",
+    "db:migration:drop": "drizzle-kit drop",
+    "db:migration:push": "drizzle-kit push:pg",
+    "db:migration:check": "drizzle-kit check:pg",
+    "db:migration:up": "node --loader ts-node/esm src/db/migrate.ts",
+    "db:migration:status": "drizzle-kit status:pg",
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.6",

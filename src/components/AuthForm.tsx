@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
-import { authClient } from '../auth';
+import { authClient } from '../lib/auth-client';
 
 type AuthMode = 'sign-in' | 'sign-up';
 
-export function AuthForm() {
+interface AuthFormProps {
+  onSuccess?: () => void;
+}
+
+export function AuthForm({ onSuccess }: AuthFormProps) {
   const [mode, setMode] = useState<AuthMode>('sign-in');
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -17,18 +22,18 @@ export function AuthForm() {
 
     try {
       if (mode === 'sign-up') {
-        const { error } = await authClient.signUp.email({
+        await authClient.signUp.email({
+          name,
           email,
           password,
         });
-        if (error) throw error;
       } else {
-        const { error } = await authClient.signIn.email({
+        await authClient.signIn.email({
           email,
           password,
         });
-        if (error) throw error;
       }
+      onSuccess?.();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
@@ -52,6 +57,29 @@ export function AuthForm() {
             {error && (
               <div className='bg-red-50 border border-red-200 text-red-600 rounded-md p-4 text-sm'>
                 {error}
+              </div>
+            )}
+
+            {mode === 'sign-up' && (
+              <div>
+                <label
+                  htmlFor='name'
+                  className='block text-sm font-medium text-gray-700'
+                >
+                  Name
+                </label>
+                <div className='mt-1'>
+                  <input
+                    id='name'
+                    name='name'
+                    type='text'
+                    autoComplete='name'
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className='appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
+                  />
+                </div>
               </div>
             )}
 

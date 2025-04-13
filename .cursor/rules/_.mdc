@@ -5,22 +5,76 @@ alwaysApply: false
 ---
 # UnHabits Project Rules
 
-## Project Configuration
-- Package Manager: [package_manager.mdc](mdc:.cursor/rules/package_manager.mdc)
+## Current Task Status
 
-## Current Tasks
-- Implementing PWA assets generation for the project
-- Setting up iOS PWA testing environment
-- Configuring iOS-specific PWA settings
-- Creating local HTTPS development environment
-- Implementing archived unhabits view and restore functionality
-- Implementing proper logging functionality for unhabits
-- Adding edit capabilities for individual unhabits
+- ✅ PWA assets generation completed
+- ✅ PWA configuration in vite.config.ts completed
+- ✅ iOS PWA meta tags added to index.html
+- ⏳ Setting up local HTTPS development environment
+- ⏳ Implementing archived unhabits view
+- ⏳ Implementing restore functionality
+- ⏳ Implementing proper logging functionality
+- ⏳ Adding edit capabilities
+
+## Project Requirements
+
+1. ✅ Use bun as package manager
+2. ✅ Generate PWA assets from logo.png
+3. ✅ Implement proper PWA configuration for icon generation
+4. ✅ Configure iOS-specific PWA meta tags
+5. ⏳ Enable HTTPS for iOS PWA testing
+6. ⏳ Allow users to view archived unhabits
+7. ⏳ Enable restoring archived unhabits back to active state
+8. ⏳ Implement proper logging functionality
+9. ⏳ Add ability to edit existing unhabits
 
 ## Technical Stack
+
 - Vite
 - React
 - TypeScript
 - PWA support via vite-plugin-pwa
-- Local HTTPS development server
-- Bun package manager 
+- Local HTTPS development server (pending)
+
+## PWA Configuration Status
+
+### Completed
+- Basic PWA setup in vite.config.ts
+- PWA assets generation and placement in public directory
+- iOS-specific meta tags in index.html
+- Proper favicon and apple touch icon configuration
+- Full-screen mode support for iOS
+- Splash screen configuration
+- Status bar appearance configuration
+
+### Pending
+- Local HTTPS setup for testing
+- Service worker implementation verification
+- Offline functionality testing
+- iOS-specific testing
+
+## Next Steps
+
+1. Set up local HTTPS development environment
+2. Test PWA installation on iOS devices
+3. Implement archived unhabits view
+4. Add restore functionality for archived unhabits
+5. Implement logging system
+6. Add edit capabilities for existing unhabits
+
+## Technical Requirements
+- Use bun as package manager
+- PWA assets are generated from logo.png
+- HTTPS required for iOS PWA testing
+- Proper logging system for unhabit tracking
+- Edit functionality for existing unhabits
+
+## Stack
+- Vite
+- React
+- TypeScript
+- vite-plugin-pwa
+- Local HTTPS development
+
+## Authentication
+See `.cursor/rules/auth.mdc`
