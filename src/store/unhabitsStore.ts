@@ -14,7 +14,7 @@ interface UnhabitsState {
     unhabit: Omit<Unhabit, 'id' | 'createdAt' | 'archived'>,
   ) => Promise<void>;
   addLog: (log: Omit<UnhabitLog, 'id'>) => Promise<void>;
-  updateLog: (logId: string, count: number) => Promise<void>;
+  updateLog: (log: UnhabitLog) => Promise<void>;
   updateUnhabit: (
     id: string,
     updates: Partial<Omit<Unhabit, 'id' | 'createdAt' | 'archived'>>,
@@ -117,18 +117,18 @@ export const useUnhabitsStore = create<UnhabitsState>()((set) => ({
     }
   },
 
-  updateLog: async (logId, count) => {
+  updateLog: async (log) => {
     try {
       const { error } = await supabase
         .from('logs')
-        .update({ count })
-        .eq('id', logId);
+        .update({ count: log.count })
+        .eq('id', log.id);
 
       if (error) throw error;
 
       set((state) => ({
         logs: state.logs.map((log) =>
-          log.id === logId ? { ...log, count } : log,
+          log.id === log.id ? { ...log, count: log.count } : log,
         ),
       }));
     } catch (error) {

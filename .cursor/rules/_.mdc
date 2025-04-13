@@ -1,7 +1,12 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
 # UnHabits Project Rules
 
 ## Project Configuration
-- Package Manager: [See package_manager.mdc](./package_manager.mdc)
+- Package Manager: [package_manager.mdc](mdc:.cursor/rules/package_manager.mdc)
 
 ## Current Tasks
 - Implementing PWA assets generation for the project

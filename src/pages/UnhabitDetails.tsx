@@ -52,7 +52,12 @@ export function UnhabitDetails() {
     const today = format(new Date(), 'yyyy-MM-dd');
     if (todayLog) {
       // Update existing log
-      await updateLog(todayLog.id, todayLog.count + 1);
+      await updateLog({
+        id: todayLog.id,
+        unhabitId,
+        date: today,
+        count: todayLog.count + 1,
+      });
     } else {
       // Create new log
       await addLog({
