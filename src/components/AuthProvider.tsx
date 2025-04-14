@@ -10,7 +10,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const { data, isPending } = authClient.useSession();
+  const { data, isPending, error } = authClient.useSession();
   const user = data ? ({ id: data.user.id } as User) : null;
 
   if (isPending) {
@@ -19,6 +19,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600'></div>
       </div>
     );
+  }
+
+  if (error) {
+    return <div>Error: {error.message}</div>;
   }
 
   if (!user) {

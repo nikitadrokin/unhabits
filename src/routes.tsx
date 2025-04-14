@@ -4,7 +4,7 @@ import {
   createRootRoute,
 } from '@tanstack/react-router';
 import { Layout } from './components/Layout';
-import { Dashboard } from './pages/Dashboard';
+import Dashboard from './pages/Dashboard';
 import { UnhabitForm } from './pages/UnhabitForm';
 import { UnhabitDetails } from './pages/UnhabitDetails';
 import ArchivedUnhabits from './pages/ArchivedUnhabits';

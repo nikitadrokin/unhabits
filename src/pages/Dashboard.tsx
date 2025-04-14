@@ -4,13 +4,27 @@ import { useUnhabitsStore } from '../store/unhabitsStore';
 import { Archive, ArrowRight, Box } from 'lucide-react';
 import { buttonVariants } from '@/components/ui/button';
 
-export function Dashboard() {
-  const { unhabits, logs, archiveUnhabit, fetchUnhabits } = useUnhabitsStore();
+export default function Dashboard() {
+  const { unhabits, logs, archiveUnhabit, fetchUnhabits, loading, error } =
+    useUnhabitsStore();
   const activeUnhabits = unhabits.filter((u) => !u.archived);
 
   useEffect(() => {
     fetchUnhabits();
   }, [fetchUnhabits]);
+
+  if (loading) {
+    return <div className='text-center py-12'>Loading...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className='text-center py-12 text-red-600'>
+        <h3 className='text-lg font-medium mb-2'>Error loading unhabits</h3>
+        <p>{error}</p>
+      </div>
+    );
+  }
 
   return (
     <div>
