@@ -1,5 +1,20 @@
 # Authentication Configuration
 
+## Auth Client Setup
+- Base URL configured to use VITE_APP_URL environment variable with localhost:5173 fallback
+- Using better-auth customSessionClient plugin without custom configuration
+- Exports standard auth functions: signIn, signUp, signOut, useSession, getSession, $fetch
+
+## Authentication Flow
+- Session management handled by better-auth
+- Default session configuration used for cookies and storage
+- Type-safe auth client implementation using TypeScript
+
+## Security Considerations
+- Environment variables used for sensitive configuration
+- Secure cookie handling through better-auth defaults
+- Type safety enforced through TypeScript generics
+
 ## Overview
 The application uses better-auth for authentication, replacing the previous Supabase implementation.
 

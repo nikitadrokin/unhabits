@@ -37,32 +37,37 @@ export function UnhabitDetails() {
 
   const last7Days = Array.from({ length: 7 }, (_, i) => {
     const date = format(subDays(new Date(), i), 'yyyy-MM-dd');
-    const log = unhabitLogs.find((l) => l.date === date);
+    const log = unhabitLogs.find(
+      (l) => format(new Date(l.date), 'yyyy-MM-dd') === date,
+    );
     return {
       date,
       count: log?.count || 0,
     };
   }).reverse();
-
   const todayLog = unhabitLogs.find(
-    (log) => log.date === format(new Date(), 'yyyy-MM-dd'),
+    (log) =>
+      format(new Date(log.date), 'yyyy-MM-dd') ===
+      format(new Date(), 'yyyy-MM-dd'),
   );
 
   const handleIncrement = async () => {
-    const today = format(new Date(), 'yyyy-MM-dd');
     if (todayLog) {
       // Update existing log
       await updateLog({
         id: todayLog.id,
         unhabitId,
-        date: today,
+        date: new Date(),
         count: todayLog.count + 1,
+        userId: unhabit.userId,
+        createdAt: todayLog.createdAt,
+        updatedAt: new Date(),
       });
     } else {
       // Create new log
       await addLog({
         unhabitId,
-        date: today,
+        date: new Date(),
         count: 1,
       });
     }

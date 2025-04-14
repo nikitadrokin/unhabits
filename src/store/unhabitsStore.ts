@@ -1,6 +1,10 @@
 import { create } from 'zustand';
-import { supabase } from '../lib/supabase';
+import { db } from '../db';
+import { unhabits, logs, user } from '../db/schema';
+import { eq, desc } from 'drizzle-orm';
 import { Unhabit, UnhabitLog } from '../types';
+import { v4 as uuidv4 } from 'uuid';
+import { authClient } from '@/lib/auth-client';
 
 interface UnhabitsState {
   unhabits: Unhabit[];
@@ -11,13 +15,20 @@ interface UnhabitsState {
   fetchUnhabits: () => Promise<void>;
   fetchArchivedUnhabits: () => Promise<void>;
   addUnhabit: (
-    unhabit: Omit<Unhabit, 'id' | 'createdAt' | 'archived'>,
+    unhabit: Omit<
+      Unhabit,
+      'id' | 'createdAt' | 'updatedAt' | 'archived' | 'userId'
+    >,
   ) => Promise<void>;
-  addLog: (log: Omit<UnhabitLog, 'id'>) => Promise<void>;
+  addLog: (
+    log: Omit<UnhabitLog, 'id' | 'createdAt' | 'updatedAt' | 'userId'>,
+  ) => Promise<void>;
   updateLog: (log: UnhabitLog) => Promise<void>;
   updateUnhabit: (
     id: string,
-    updates: Partial<Omit<Unhabit, 'id' | 'createdAt' | 'archived'>>,
+    updates: Partial<
+      Omit<Unhabit, 'id' | 'createdAt' | 'updatedAt' | 'archived' | 'userId'>
+    >,
   ) => Promise<void>;
   archiveUnhabit: (id: string) => Promise<void>;
   restoreUnhabit: (id: string) => Promise<void>;
@@ -33,22 +44,20 @@ export const useUnhabitsStore = create<UnhabitsState>()((set) => ({
   fetchUnhabits: async () => {
     set({ loading: true, error: null });
     try {
-      const { data: unhabits, error: unhabitsError } = await supabase
-        .from('unhabits')
-        .select('*')
-        .eq('archived', false)
-        .order('created_at', { ascending: false });
+      const fetchedUnhabits = await db.query.unhabits.findMany({
+        where: eq(unhabits.archived, false),
+        orderBy: desc(unhabits.createdAt),
+      });
 
-      if (unhabitsError) throw unhabitsError;
+      const fetchedLogs = await db.query.logs.findMany({
+        orderBy: desc(logs.date),
+      });
 
-      const { data: logs, error: logsError } = await supabase
-        .from('logs')
-        .select('*')
-        .order('date', { ascending: false });
-
-      if (logsError) throw logsError;
-
-      set({ unhabits, logs, loading: false });
+      set({
+        unhabits: fetchedUnhabits as Unhabit[],
+        logs: fetchedLogs as UnhabitLog[],
+        loading: false,
+      });
     } catch (error) {
       set({
         error: error instanceof Error ? error.message : 'An error occurred',
@@ -60,15 +69,15 @@ export const useUnhabitsStore = create<UnhabitsState>()((set) => ({
   fetchArchivedUnhabits: async () => {
     set({ loading: true, error: null });
     try {
-      const { data: archivedUnhabits, error } = await supabase
-        .from('unhabits')
-        .select('*')
-        .eq('archived', true)
-        .order('created_at', { ascending: false });
+      const fetchedArchivedUnhabits = await db.query.unhabits.findMany({
+        where: eq(unhabits.archived, true),
+        orderBy: desc(unhabits.createdAt),
+      });
 
-      if (error) throw error;
-
-      set({ archivedUnhabits, loading: false });
+      set({
+        archivedUnhabits: fetchedArchivedUnhabits as Unhabit[],
+        loading: false,
+      });
     } catch (error) {
       set({
         error: error instanceof Error ? error.message : 'An error occurred',
@@ -78,17 +87,30 @@ export const useUnhabitsStore = create<UnhabitsState>()((set) => ({
   },
 
   addUnhabit: async (unhabit) => {
-    try {
-      const { data, error } = await supabase
-        .from('unhabits')
-        .insert([unhabit])
-        .select()
-        .single();
+    const { data } = authClient.useSession();
 
-      if (error) throw error;
+    if (!data) {
+      throw new Error('User not found');
+    }
+
+    const { user } = data;
+
+    try {
+      const now = new Date();
+      const [insertedUnhabit] = await db
+        .insert(unhabits)
+        .values({
+          id: uuidv4(),
+          ...unhabit,
+          archived: false,
+          userId: user.id,
+          createdAt: now,
+          updatedAt: now,
+        })
+        .returning();
 
       set((state) => ({
-        unhabits: [data, ...state.unhabits],
+        unhabits: [insertedUnhabit as Unhabit, ...state.unhabits],
       }));
     } catch (error) {
       set({
@@ -98,17 +120,27 @@ export const useUnhabitsStore = create<UnhabitsState>()((set) => ({
   },
 
   addLog: async (log) => {
-    try {
-      const { data, error } = await supabase
-        .from('logs')
-        .insert([log])
-        .select()
-        .single();
+    const { data } = authClient.useSession();
 
-      if (error) throw error;
+    if (!data) {
+      throw new Error('User not found');
+    }
+
+    try {
+      const now = new Date();
+      const [insertedLog] = await db
+        .insert(logs)
+        .values({
+          id: uuidv4(),
+          ...log,
+          userId: user.id.toString(),
+          createdAt: now,
+          updatedAt: now,
+        })
+        .returning();
 
       set((state) => ({
-        logs: [data, ...state.logs],
+        logs: [insertedLog as UnhabitLog, ...state.logs],
       }));
     } catch (error) {
       set({
@@ -119,16 +151,18 @@ export const useUnhabitsStore = create<UnhabitsState>()((set) => ({
 
   updateLog: async (log) => {
     try {
-      const { error } = await supabase
-        .from('logs')
-        .update({ count: log.count })
-        .eq('id', log.id);
-
-      if (error) throw error;
+      const now = new Date();
+      await db
+        .update(logs)
+        .set({
+          count: log.count,
+          updatedAt: now,
+        })
+        .where(eq(logs.id, log.id));
 
       set((state) => ({
-        logs: state.logs.map((log) =>
-          log.id === log.id ? { ...log, count: log.count } : log,
+        logs: state.logs.map((l) =>
+          l.id === log.id ? { ...l, count: log.count, updatedAt: now } : l,
         ),
       }));
     } catch (error) {
@@ -140,16 +174,20 @@ export const useUnhabitsStore = create<UnhabitsState>()((set) => ({
 
   updateUnhabit: async (id, updates) => {
     try {
-      const { error } = await supabase
-        .from('unhabits')
-        .update(updates)
-        .eq('id', id);
-
-      if (error) throw error;
+      const now = new Date();
+      await db
+        .update(unhabits)
+        .set({
+          ...updates,
+          updatedAt: now,
+        })
+        .where(eq(unhabits.id, id));
 
       set((state) => ({
         unhabits: state.unhabits.map((unhabit) =>
-          unhabit.id === id ? { ...unhabit, ...updates } : unhabit,
+          unhabit.id === id
+            ? { ...unhabit, ...updates, updatedAt: now }
+            : unhabit,
         ),
       }));
     } catch (error) {
@@ -161,20 +199,29 @@ export const useUnhabitsStore = create<UnhabitsState>()((set) => ({
 
   archiveUnhabit: async (id) => {
     try {
-      const { error } = await supabase
-        .from('unhabits')
-        .update({ archived: true })
-        .eq('id', id);
+      const now = new Date();
+      await db
+        .update(unhabits)
+        .set({
+          archived: true,
+          updatedAt: now,
+        })
+        .where(eq(unhabits.id, id));
 
-      if (error) throw error;
+      set((state) => {
+        const unhabitToArchive = state.unhabits.find(
+          (unhabit) => unhabit.id === id,
+        );
+        if (!unhabitToArchive) return state;
 
-      set((state) => ({
-        unhabits: state.unhabits.filter((unhabit) => unhabit.id !== id),
-        archivedUnhabits: [
-          state.unhabits.find((unhabit) => unhabit.id === id)!,
-          ...state.archivedUnhabits,
-        ],
-      }));
+        return {
+          unhabits: state.unhabits.filter((unhabit) => unhabit.id !== id),
+          archivedUnhabits: [
+            { ...unhabitToArchive, archived: true, updatedAt: now },
+            ...state.archivedUnhabits,
+          ],
+        };
+      });
     } catch (error) {
       set({
         error: error instanceof Error ? error.message : 'An error occurred',
@@ -184,22 +231,31 @@ export const useUnhabitsStore = create<UnhabitsState>()((set) => ({
 
   restoreUnhabit: async (id) => {
     try {
-      const { error } = await supabase
-        .from('unhabits')
-        .update({ archived: false })
-        .eq('id', id);
+      const now = new Date();
+      await db
+        .update(unhabits)
+        .set({
+          archived: false,
+          updatedAt: now,
+        })
+        .where(eq(unhabits.id, id));
 
-      if (error) throw error;
+      set((state) => {
+        const unhabitToRestore = state.archivedUnhabits.find(
+          (unhabit) => unhabit.id === id,
+        );
+        if (!unhabitToRestore) return state;
 
-      set((state) => ({
-        archivedUnhabits: state.archivedUnhabits.filter(
-          (unhabit) => unhabit.id !== id,
-        ),
-        unhabits: [
-          state.archivedUnhabits.find((unhabit) => unhabit.id === id)!,
-          ...state.unhabits,
-        ],
-      }));
+        return {
+          archivedUnhabits: state.archivedUnhabits.filter(
+            (unhabit) => unhabit.id !== id,
+          ),
+          unhabits: [
+            { ...unhabitToRestore, archived: false, updatedAt: now },
+            ...state.unhabits,
+          ],
+        };
+      });
     } catch (error) {
       set({
         error: error instanceof Error ? error.message : 'An error occurred',

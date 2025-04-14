@@ -1,4 +1,11 @@
-import { pgTable, uuid, text, timestamp, boolean } from 'drizzle-orm/pg-core';
+import {
+  pgTable,
+  uuid,
+  text,
+  timestamp,
+  boolean,
+  integer,
+} from 'drizzle-orm/pg-core';
 
 export const user = pgTable('user', {
   id: uuid('id').primaryKey(),
@@ -48,4 +55,32 @@ export const verification = pgTable('verification', {
   expiresAt: timestamp('expires_at').notNull(),
   createdAt: timestamp('created_at'),
   updatedAt: timestamp('updated_at'),
+});
+
+export const unhabits = pgTable('unhabits', {
+  id: uuid('id').primaryKey(),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  description: text('description'),
+  goal: text('goal'),
+  archived: boolean('archived').notNull().default(false),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+export const logs = pgTable('logs', {
+  id: uuid('id').primaryKey(),
+  unhabitId: uuid('unhabit_id')
+    .notNull()
+    .references(() => unhabits.id, { onDelete: 'cascade' }),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  date: timestamp('date').notNull(),
+  count: integer('count').notNull().default(1),
+  note: text('note'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });

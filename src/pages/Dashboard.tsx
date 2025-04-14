@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import { Link } from '@tanstack/react-router';
-import { format } from 'date-fns';
 import { useUnhabitsStore } from '../store/unhabitsStore';
 import { Archive, ArrowRight, Box } from 'lucide-react';
 import { buttonVariants } from '@/components/ui/button';
@@ -51,7 +50,8 @@ export function Dashboard() {
               (log) => log.unhabitId === unhabit.id,
             );
             const todayLog = unhabitLogs.find(
-              (log) => log.date === format(new Date(), 'yyyy-MM-dd'),
+              (log) =>
+                new Date(log.date).toDateString() === new Date().toDateString(),
             );
 
             return (

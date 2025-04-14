@@ -1,10 +1,13 @@
 export interface Unhabit {
   id: string;
+  userId: string;
   name: string;
-  description: string;
+  description?: string | null;
+  goal?: string | null;
   frequency: 'daily' | 'weekly' | 'monthly';
   target: number;
-  createdAt: string;
+  createdAt: Date;
+  updatedAt: Date;
   archived: boolean;
   notificationTime?: string;
   notificationEnabled: boolean;
@@ -12,10 +15,13 @@ export interface Unhabit {
 
 export interface UnhabitLog {
   id: string;
+  userId: string;
   unhabitId: string;
-  date: string;
+  date: Date;
   count: number;
-  notes?: string;
+  note?: string | null;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface NotificationPreferences {
